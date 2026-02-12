@@ -52,10 +52,21 @@ multi-agent-research-system/
 │   ├── architecture.md
 │   ├── deployment.md
 │   ├── troubleshooting.md
-│   └── contributing.md
+│   ├── contributing.md
+│   └── agent-reuse.md
 │
-└── examples/
-    └── sample-topics.md
+├── examples/
+│   ├── sample-topics.md
+│   ├── custom-workflows/
+│   │   ├── faq_generator.py
+│   │   ├── content_writer.py
+│   │   └── search_assistant.py
+│   ├── integrations/
+│   │   ├── flask_example.py
+│   │   ├── fastapi_example.py
+│   │   └── nodejs_wrapper.ts
+│   └── notebooks/
+│       └── agent_playground.ipynb
 ```
 
 ## File Organization

@@ -20,32 +20,244 @@ A production-ready, distributed AI research system built with specialized agents
 
 ## 🏗️ Architecture
 
-The system uses a microservices architecture where each agent runs as an independent Kubernetes pod:
+The system uses a microservices architecture where each agent runs as an independent Kubernetes pod with specialized responsibilities.
+
+### System Overview
 
 ```
-┌─────────────┐
-│ Streamlit   │  User Interface (Port 8501)
-│   Frontend  │
-└──────┬──────┘
-       │
-┌──────▼──────┐
-│ Coordinator │  Workflow Orchestrator (Port 8006)
-└──────┬──────┘
-       │
-  ┌────┴────┐
-  │         │
-┌─▼─────┐ ┌─▼─────┐
-│Agents │ │ Redis │  5 Specialized Agents + State Store
-└───────┘ └───────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          Kubernetes Cluster                              │
+│                                                                          │
+│  ┌────────────────────────────────────────────────────────────────┐    │
+│  │                     Frontend Layer                              │    │
+│  │  ┌──────────────────────────────────────────────────────────┐  │    │
+│  │  │  Streamlit UI (Pod)                                       │  │    │
+│  │  │  - Port: 8501                                             │  │    │
+│  │  │  - User Interface & Visualization                         │  │    │
+│  │  └────────────────────────┬─────────────────────────────────┘  │    │
+│  └───────────────────────────┼────────────────────────────────────┘    │
+│                               │ HTTP/REST                               │
+│  ┌───────────────────────────▼────────────────────────────────────┐    │
+│  │                   Orchestration Layer                          │    │
+│  │  ┌──────────────────────────────────────────────────────────┐  │    │
+│  │  │  Coordinator Service (Pod)                                │  │    │
+│  │  │  - Port: 8006                                             │  │    │
+│  │  │  - Workflow Management                                    │  │    │
+│  │  │  - Agent Communication                                    │  │    │
+│  │  │  - Decision Logic                                         │  │    │
+│  │  └────┬────────┬────────┬────────┬────────┬─────────────────┘  │    │
+│  └───────┼────────┼────────┼────────┼────────┼────────────────────┘    │
+│          │        │        │        │        │                         │
+│          │ REST   │ REST   │ REST   │ REST   │ REST                    │
+│          │        │        │        │        │                         │
+│  ┌───────▼────────▼────────▼────────▼────────▼────────────────────┐    │
+│  │                      Agent Layer                               │    │
+│  │                                                                 │    │
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐    │    │
+│  │  │   Topic     │  │  Question   │  │      Search         │    │    │
+│  │  │   Refiner   │  │  Architect  │  │    Strategist       │    │    │
+│  │  │  🎯 :8001   │  │  ❓ :8002   │  │     🔍 :8003        │    │    │
+│  │  │             │  │             │  │                     │    │    │
+│  │  │ - Clarify   │  │ - Generate  │  │ - Optimize queries  │    │    │
+│  │  │   topics    │  │   questions │  │ - Execute searches  │    │    │
+│  │  │ - Refine    │  │ - Design    │  │ - DuckDuckGo API   │    │    │
+│  │  │   scope     │  │   strategy  │  │ - Result parsing   │    │    │
+│  │  │             │  │             │  │                     │    │    │
+│  │  │ Temp: 0.5   │  │ Temp: 0.7   │  │   Temp: 0.3        │    │    │
+│  │  └──────┬──────┘  └──────┬──────┘  └──────┬─────────────┘    │    │
+│  │         │                │                 │                   │    │
+│  │  ┌──────▼──────┐  ┌──────▼────────┐                           │    │
+│  │  │    Data     │  │    Report     │                           │    │
+│  │  │   Analyst   │  │    Writer     │                           │    │
+│  │  │  📊 :8004   │  │   📝 :8005    │                           │    │
+│  │  │             │  │               │                           │    │
+│  │  │ - Analyze   │  │ - Synthesize  │                           │    │
+│  │  │   results   │  │   findings    │                           │    │
+│  │  │ - Extract   │  │ - Generate    │                           │    │
+│  │  │   insights  │  │   reports     │                           │    │
+│  │  │ - Quality   │  │ - Format      │                           │    │
+│  │  │   scoring   │  │   output      │                           │    │
+│  │  │             │  │               │                           │    │
+│  │  │ Temp: 0.4   │  │  Temp: 0.6    │                           │    │
+│  │  └──────┬──────┘  └──────┬────────┘                           │    │
+│  │         │                │                                     │    │
+│  └─────────┼────────────────┼─────────────────────────────────────┘    │
+│            │                │                                           │
+│            │ Redis Protocol │                                           │
+│            │                │                                           │
+│  ┌─────────▼────────────────▼─────────────────────────────────────┐    │
+│  │                    State Layer                                  │    │
+│  │  ┌──────────────────────────────────────────────────────────┐  │    │
+│  │  │  Redis (Pod)                                              │  │    │
+│  │  │  - Port: 6379                                             │  │    │
+│  │  │  - Shared State Store                                     │  │    │
+│  │  │  - Task Management                                        │  │    │
+│  │  │  - Inter-Agent Communication                              │  │    │
+│  │  └──────────────────────────────────────────────────────────┘  │    │
+│  └─────────────────────────────────────────────────────────────────┘    │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+
+         External Services
+         ┌─────────────────┐
+         │  Google Gemini  │
+         │  API (LLM)      │
+         └────────▲────────┘
+                  │
+         All Agents use LLM
+         for intelligence
 ```
 
 ### Agent Team
 
-1. **🎯 Dr. Topic Refiner** (Port 8001) - Clarifies research objectives
-2. **❓ Prof. Question Architect** (Port 8002) - Designs research questions  
-3. **🔍 Agent Search Strategist** (Port 8003) - Executes web searches
-4. **📊 Dr. Data Analyst** (Port 8004) - Extracts insights from data
-5. **📝 Dr. Report Writer** (Port 8005) - Synthesizes comprehensive reports
+Each agent is a specialized microservice with its own LLM instance, personality, and expertise:
+
+#### 🎯 **Dr. Topic Refiner** (Port 8001)
+- **Role**: Research Topic Specialist
+- **Expertise**: Clarifying research objectives and scoping studies
+- **Temperature**: 0.5 (More focused and consistent)
+- **Responsibilities**:
+  - Analyzes raw user input
+  - Identifies core research questions
+  - Refines topics to be specific and searchable
+  - Ensures scope is neither too broad nor too narrow
+
+#### ❓ **Prof. Question Architect** (Port 8002)
+- **Role**: Research Question Designer
+- **Expertise**: Formulating precise, investigable research questions
+- **Temperature**: 0.7 (Balanced creativity)
+- **Responsibilities**:
+  - Generates 3 specific research questions per iteration
+  - Designs questions that are directly searchable
+  - Covers different aspects of the topic
+  - Builds upon previous iterations progressively
+
+#### 🔍 **Agent Search Strategist** (Port 8003)
+- **Role**: Information Retrieval Specialist
+- **Expertise**: Designing search strategies and executing queries
+- **Temperature**: 0.3 (Very focused and precise)
+- **Responsibilities**:
+  - Optimizes research questions into effective search queries
+  - Executes searches via DuckDuckGo API
+  - Retrieves and parses search results
+  - Handles rate limiting and errors gracefully
+
+#### 📊 **Dr. Data Analyst** (Port 8004)
+- **Role**: Research Data Analyst
+- **Expertise**: Extracting insights and identifying patterns
+- **Temperature**: 0.4 (Analytical and focused)
+- **Responsibilities**:
+  - Analyzes search results for key information
+  - Extracts the 5 most important findings per iteration
+  - Calculates quality scores for research completeness
+  - Identifies patterns and relationships in data
+  - Avoids redundancy across findings
+
+#### 📝 **Dr. Report Writer** (Port 8005)
+- **Role**: Research Report Specialist
+- **Expertise**: Synthesizing findings into clear, structured reports
+- **Temperature**: 0.6 (Moderately creative for readability)
+- **Responsibilities**:
+  - Synthesizes all findings into cohesive narrative
+  - Generates structured reports with sections
+  - Formats output professionally
+  - Adds metadata and research statistics
+  - Creates executive summaries
+
+#### 🎭 **Chief Coordinator** (Port 8006)
+- **Role**: Research Coordination Specialist
+- **Expertise**: Managing multi-agent workflows and decision-making
+- **Temperature**: 0.2 (Highly deterministic)
+- **Responsibilities**:
+  - Orchestrates the complete research workflow
+  - Routes messages between agents
+  - Makes decisions on research continuation
+  - Manages task state and progress
+  - Handles errors and retries
+
+### Research Workflow
+
+```
+┌─────────┐
+│  User   │
+│ Input   │
+└────┬────┘
+     │
+     ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                        Research Workflow                             │
+│                                                                      │
+│  1. Topic Refiner (🎯)                                              │
+│     Input: Raw topic                                                │
+│     Output: Refined, focused research topic                         │
+│     └─────────────────────────────────────────────┐                 │
+│                                                    ▼                 │
+│  2. Question Architect (❓)                                         │
+│     Input: Refined topic                                            │
+│     Output: 3 specific research questions                           │
+│     └─────────────────────────────────────────────┐                 │
+│                                                    ▼                 │
+│  3. Search Strategist (🔍)                                          │
+│     Input: Research questions                                       │
+│     Process: Optimize queries → Execute searches                    │
+│     Output: Search results from DuckDuckGo                          │
+│     └─────────────────────────────────────────────┐                 │
+│                                                    ▼                 │
+│  4. Data Analyst (📊)                                               │
+│     Input: Search results                                           │
+│     Process: Extract insights → Calculate quality                   │
+│     Output: Key findings + quality score                            │
+│     └─────────────────────────────────────────────┐                 │
+│                                                    ▼                 │
+│  5. Coordinator Decision (🎭)                                       │
+│     Evaluate: Quality score, iterations, findings count             │
+│     Decision: Continue research OR Generate report                  │
+│                                                                      │
+│     ┌────────────────┐              ┌────────────────┐             │
+│     │   Continue?    │──────NO─────▶│  Generate      │             │
+│     │ (Loop back to  │              │  Final Report  │             │
+│     │  step 2)       │              │                │             │
+│     └────────────────┘              └────────┬───────┘             │
+│            │                                  │                     │
+│           YES                                 ▼                     │
+│            │                        6. Report Writer (📝)          │
+│            │                           Input: All findings          │
+│            └─────────────────────────▶ Output: Formatted report    │
+│                                                │                    │
+└────────────────────────────────────────────────┼────────────────────┘
+                                                 ▼
+                                        ┌──────────────┐
+                                        │   Report     │
+                                        │   to User    │
+                                        └──────────────┘
+```
+
+### Key Architectural Features
+
+#### 🔗 **Inter-Service Communication**
+- **Synchronous**: HTTP/REST API calls between coordinator and agents
+- **Asynchronous**: Background task processing for long-running research
+- **State Management**: Redis for shared state across all services
+- **Message Format**: Standardized JSON payload with task tracking
+
+#### 🔄 **Workflow Orchestration**
+- **Dynamic Routing**: Coordinator decides when to continue or finalize research
+- **Iterative Refinement**: Loops back to generate more questions based on findings
+- **Quality Assessment**: Data Analyst calculates quality scores to determine completion
+- **Error Handling**: Graceful degradation with detailed error propagation
+
+#### 📦 **Microservices Benefits**
+- **Independent Scaling**: Scale search agents separately from other agents
+- **Fault Isolation**: One agent failure doesn't crash the entire system
+- **Technology Flexibility**: Each agent can use different libraries/versions
+- **Deployment Independence**: Update agents without system-wide restarts
+- **Resource Optimization**: Each agent has tailored CPU/memory allocation
+
+#### 🎚️ **Temperature Settings**
+Each agent uses specific temperature settings for optimal performance:
+- **0.2-0.3**: Deterministic (Coordinator, Search Strategist)
+- **0.4-0.5**: Analytical (Data Analyst, Topic Refiner)
+- **0.6-0.7**: Balanced creativity (Report Writer, Question Architect)
 
 ## 🚀 Quick Start
 
@@ -251,6 +463,70 @@ kind load docker-image multi-agent-research/coordinator:latest
 ```
 
 See [docs/troubleshooting.md](docs/troubleshooting.md) for more details.
+
+## 🔄 Reusing Agents
+
+The agents are designed as independent, reusable components that can be integrated into other applications!
+
+### As Python Library
+
+```python
+from agents.topic_refiner_service import TopicRefinerAgent
+from agents.question_architect_service import QuestionArchitectAgent
+
+# Use agents directly in your code
+refiner = TopicRefinerAgent()
+architect = QuestionArchitectAgent()
+
+refined_topic = refiner.refine_topic("machine learning")
+questions = architect.generate_questions(refined_topic, 0)
+```
+
+### As REST API
+
+```bash
+# Deploy individual agents as APIs
+docker run -p 8001:8001 -e GOOGLE_API_KEY="key" \
+  multi-agent-research/topic-refiner:latest
+
+# Call from any language
+curl -X POST http://localhost:8001/process \
+  -H "Content-Type: application/json" \
+  -d '{"task_id": "123", "action": "refine_topic", ...}'
+```
+
+### Custom Workflows
+
+Build your own workflows with any combination of agents:
+
+```python
+# Example: FAQ Generator
+class FAQGenerator:
+    def __init__(self):
+        self.architect = QuestionArchitectAgent()
+        self.searcher = SearchStrategistAgent()
+    
+    def generate_faq(self, topic: str):
+        questions = self.architect.generate_questions(topic, 0)
+        answers = [self.searcher.execute_search(q) for q in questions]
+        return zip(questions, answers)
+```
+
+**📖 See [AGENT-REUSE.md](docs/agent-reuse.md) for detailed integration examples including:**
+- Standalone Python usage
+- REST API integration
+- Message queue patterns
+- Serverless deployment
+- Node.js wrappers
+- Custom workflow examples
+
+**💡 Example Applications** (in `examples/` directory):
+- **FAQ Generator** - Auto-generate FAQs for any topic
+- **Content Writer** - Create articles with AI assistance
+- **Search Assistant** - Enhanced search with analysis
+- **FastAPI Service** - Expose agents as REST APIs
+- **Flask Integration** - Web application examples
+- **Jupyter Notebooks** - Interactive agent exploration
 
 ## 📚 Documentation
 
