@@ -5,7 +5,7 @@ Base class for agent microservices
 
 from fastapi import FastAPI, HTTPException
 from langchain_google_genai import ChatGoogleGenerativeAI
-from shared_models import AgentMessage, AgentResponse, GOOGLE_API_KEY
+from shared.shared_models import AgentMessage, AgentResponse, GOOGLE_API_KEY
 from datetime import datetime
 from typing import Optional
 import redis

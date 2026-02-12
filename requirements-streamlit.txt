@@ -1,0 +1,4 @@
+streamlit==1.31.0
+httpx==0.26.0
+redis==5.0.1
+pydantic==2.5.3

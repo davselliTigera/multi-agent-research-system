@@ -2,11 +2,11 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY requirements/requirements-coordinator.txt .
+COPY requirements/requirements-coordinator.txt requirements-coordinator.txt
 RUN pip install --no-cache-dir -r requirements-coordinator.txt
 
-COPY shared/ shared/
-COPY coordinator/coordinator_service.py .
+COPY shared/ /app/shared/
+COPY coordinator/coordinator_service.py /app/coordinator_service.py
 
 EXPOSE 8006
 

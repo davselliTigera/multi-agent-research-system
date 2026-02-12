@@ -5,8 +5,8 @@ Question Architect Agent Microservice
 
 import uvicorn
 from typing import List
-from base_agent import BaseAgent
-from shared_models import AgentMessage, AgentResponse
+from agents.base_agent import BaseAgent
+from shared.shared_models import AgentMessage, AgentResponse
 
 class QuestionArchitectAgent(BaseAgent):
     """Agent specialized in crafting research questions"""

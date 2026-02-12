@@ -4,14 +4,14 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y gcc && rm -rf /var/lib/apt/lists/*
 
-COPY requirements/requirements-agent.txt .
+COPY requirements/requirements-agent.txt requirements-agent.txt
 RUN pip install --no-cache-dir -r requirements-agent.txt
 
-COPY shared/ shared/
-COPY agents/base_agent.py agents/
+COPY shared/ /app/shared/
+COPY agents/ /app/agents/
 
 ARG SERVICE_FILE
-COPY ${SERVICE_FILE} service.py
+COPY ${SERVICE_FILE} /app/service.py
 
 ARG PORT=8000
 EXPOSE ${PORT}

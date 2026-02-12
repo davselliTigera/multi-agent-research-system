@@ -5,8 +5,8 @@ Report Writer Agent Microservice
 
 import uvicorn
 from datetime import datetime
-from base_agent import BaseAgent
-from shared_models import AgentMessage, AgentResponse
+from agents.base_agent import BaseAgent
+from shared.shared_models import AgentMessage, AgentResponse
 
 class ReportWriterAgent(BaseAgent):
     """Agent specialized in writing comprehensive research reports"""

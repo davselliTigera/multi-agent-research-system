@@ -5,8 +5,8 @@ Data Analyst Agent Microservice
 
 import uvicorn
 from typing import List, Tuple
-from base_agent import BaseAgent
-from shared_models import AgentMessage, AgentResponse
+from agents.base_agent import BaseAgent
+from shared.shared_models import AgentMessage, AgentResponse
 
 class DataAnalystAgent(BaseAgent):
     """Agent specialized in analyzing and synthesizing information"""

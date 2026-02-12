@@ -12,7 +12,7 @@ import json
 import redis
 import os
 from datetime import datetime
-from shared_models import AgentMessage, AgentResponse, ResearchState, AGENTS
+from shared.shared_models import AgentMessage, AgentResponse, ResearchState, AGENTS
 
 class CoordinatorService:
     """Coordinator that orchestrates the multi-agent workflow"""

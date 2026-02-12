@@ -4,8 +4,8 @@ Topic Refiner Agent Microservice
 """
 
 import uvicorn
-from base_agent import BaseAgent
-from shared_models import AgentMessage, AgentResponse
+from agents.base_agent import BaseAgent
+from shared.shared_models import AgentMessage, AgentResponse
 
 class TopicRefinerAgent(BaseAgent):
     """Agent specialized in refining research topics"""

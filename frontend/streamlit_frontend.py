@@ -7,7 +7,7 @@ import streamlit as st
 import httpx
 import time
 import os
-from shared_models import AGENT_INFO
+from shared.shared_models import AGENT_INFO
 
 # Configuration
 COORDINATOR_URL = os.getenv("COORDINATOR_URL", "http://coordinator-service:8006")
