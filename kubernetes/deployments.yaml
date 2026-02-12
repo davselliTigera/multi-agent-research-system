@@ -1,0 +1,465 @@
+---
+# Redis Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
+---
+# Redis Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+spec:
+  selector:
+    app: redis
+  ports:
+  - port: 6379
+    targetPort: 6379
+  type: ClusterIP
+---
+# Topic Refiner Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: topic-refiner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: topic-refiner
+  template:
+    metadata:
+      labels:
+        app: topic-refiner
+    spec:
+      containers:
+      - name: topic-refiner
+        image: multi-agent-research/topic-refiner:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8001
+        env:
+        - name: REDIS_HOST
+          value: "redis-service"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: GOOGLE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: google-api-secret
+              key: api-key
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 10
+          periodSeconds: 5
+---
+# Topic Refiner Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: topic-refiner-service
+spec:
+  selector:
+    app: topic-refiner
+  ports:
+  - port: 8001
+    targetPort: 8001
+  type: ClusterIP
+---
+# Question Architect Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: question-architect
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: question-architect
+  template:
+    metadata:
+      labels:
+        app: question-architect
+    spec:
+      containers:
+      - name: question-architect
+        image: multi-agent-research/question-architect:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8002
+        env:
+        - name: REDIS_HOST
+          value: "redis-service"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: GOOGLE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: google-api-secret
+              key: api-key
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8002
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8002
+          initialDelaySeconds: 10
+          periodSeconds: 5
+---
+# Question Architect Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: question-architect-service
+spec:
+  selector:
+    app: question-architect
+  ports:
+  - port: 8002
+    targetPort: 8002
+  type: ClusterIP
+---
+# Search Strategist Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: search-strategist
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: search-strategist
+  template:
+    metadata:
+      labels:
+        app: search-strategist
+    spec:
+      containers:
+      - name: search-strategist
+        image: multi-agent-research/search-strategist:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8003
+        env:
+        - name: REDIS_HOST
+          value: "redis-service"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: GOOGLE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: google-api-secret
+              key: api-key
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8003
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8003
+          initialDelaySeconds: 10
+          periodSeconds: 5
+---
+# Search Strategist Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: search-strategist-service
+spec:
+  selector:
+    app: search-strategist
+  ports:
+  - port: 8003
+    targetPort: 8003
+  type: ClusterIP
+---
+# Data Analyst Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-analyst
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: data-analyst
+  template:
+    metadata:
+      labels:
+        app: data-analyst
+    spec:
+      containers:
+      - name: data-analyst
+        image: multi-agent-research/data-analyst:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8004
+        env:
+        - name: REDIS_HOST
+          value: "redis-service"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: GOOGLE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: google-api-secret
+              key: api-key
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8004
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8004
+          initialDelaySeconds: 10
+          periodSeconds: 5
+---
+# Data Analyst Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-analyst-service
+spec:
+  selector:
+    app: data-analyst
+  ports:
+  - port: 8004
+    targetPort: 8004
+  type: ClusterIP
+---
+# Report Writer Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: report-writer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: report-writer
+  template:
+    metadata:
+      labels:
+        app: report-writer
+    spec:
+      containers:
+      - name: report-writer
+        image: multi-agent-research/report-writer:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8005
+        env:
+        - name: REDIS_HOST
+          value: "redis-service"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: GOOGLE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: google-api-secret
+              key: api-key
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8005
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8005
+          initialDelaySeconds: 10
+          periodSeconds: 5
+---
+# Report Writer Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: report-writer-service
+spec:
+  selector:
+    app: report-writer
+  ports:
+  - port: 8005
+    targetPort: 8005
+  type: ClusterIP
+---
+# Coordinator Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coordinator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: coordinator
+  template:
+    metadata:
+      labels:
+        app: coordinator
+    spec:
+      containers:
+      - name: coordinator
+        image: multi-agent-research/coordinator:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8006
+        env:
+        - name: REDIS_HOST
+          value: "redis-service"
+        - name: REDIS_PORT
+          value: "6379"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "400m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8006
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8006
+          initialDelaySeconds: 10
+          periodSeconds: 5
+---
+# Coordinator Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: coordinator-service
+spec:
+  selector:
+    app: coordinator
+  ports:
+  - port: 8006
+    targetPort: 8006
+  type: ClusterIP
+---
+# Streamlit Frontend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: streamlit-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: streamlit-frontend
+  template:
+    metadata:
+      labels:
+        app: streamlit-frontend
+    spec:
+      containers:
+      - name: streamlit
+        image: multi-agent-research/streamlit:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8501
+        env:
+        - name: COORDINATOR_URL
+          value: "http://coordinator-service:8006"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "400m"
+---
+# Streamlit Service (LoadBalancer for external access)
+apiVersion: v1
+kind: Service
+metadata:
+  name: streamlit-service
+spec:
+  selector:
+    app: streamlit-frontend
+  ports:
+  - port: 80
+    targetPort: 8501
+  type: LoadBalancer
