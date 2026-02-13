@@ -30,7 +30,7 @@ refiner = TopicRefinerAgent()
 architect = QuestionArchitectAgent()
 searcher = SearchStrategistAgent()
 
-# In-memory storage for demo (use Redis/DB in production)
+# In-memory storage for demo (use Redis/DB as alternative)
 tasks_storage = {}
 
 

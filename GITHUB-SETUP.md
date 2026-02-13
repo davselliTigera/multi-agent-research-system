@@ -169,7 +169,7 @@ git branch -M main
 1. Go to [GitHub](https://github.com) and log in
 2. Click the `+` icon → "New repository"
 3. Name: `multi-agent-research-system`
-4. Description: "Production-ready distributed AI research system with specialized agents running as Kubernetes microservices"
+4. Description: "Distributed AI research system with specialized agents running as Kubernetes microservices"
 5. Make it **Public** (or Private if you prefer)
 6. **Don't** initialize with README (you already have one)
 7. Click "Create repository"
@@ -209,7 +209,7 @@ Add these topics to help people discover your project:
    ```markdown
    ## 🎉 Initial Release
    
-   Production-ready multi-agent research system with:
+   Multi-agent research system with:
    - 5 specialized AI agents
    - Kubernetes deployment
    - Streamlit web interface

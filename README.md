@@ -1,6 +1,6 @@
 # 🤖 Multi-Agent Research System
 
-A production-ready, distributed AI research system built with specialized agents running as Kubernetes microservices. Each agent is an independent service with specific expertise, collaborating to conduct comprehensive research on any topic.
+Distributed AI research system built with specialized agents running as Kubernetes microservices. Each agent is an independent service with specific expertise, collaborating to conduct comprehensive research on any topic.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io/)
@@ -16,7 +16,6 @@ A production-ready, distributed AI research system built with specialized agents
 - **🎨 Interactive UI** - Beautiful Streamlit interface for research management
 - **📈 Horizontal Scaling** - Scale individual agents based on workload
 - **🔍 Real-time Monitoring** - Live agent activity tracking and logging
-- **🛠️ Production Ready** - Health checks, error handling, and graceful degradation
 
 ## 🏗️ Architecture
 
@@ -410,7 +409,7 @@ kubectl get services
 - CPU: ~3.5 cores
 - Storage: ~2 GiB
 
-**Recommended (scaled for production):**
+**Recommended:**
 - Memory: ~14 GiB  
 - CPU: ~8 cores
 - Storage: ~5 GiB
