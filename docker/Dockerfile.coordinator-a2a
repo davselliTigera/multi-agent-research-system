@@ -1,0 +1,19 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements/requirements-coordinator.txt requirements-coordinator.txt
+RUN pip install --no-cache-dir -r requirements-coordinator.txt
+
+# Copy shared modules (both for compatibility)
+COPY shared/ /app/shared/
+
+# Copy A2A coordinator service
+ARG COORDINATOR_FILE=coordinator/coordinator_a2a.py
+COPY ${COORDINATOR_FILE} /app/coordinator_service.py
+
+EXPOSE 8006
+
+ENV PYTHONPATH=/app
+
+CMD ["python", "coordinator_service.py"]

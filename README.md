@@ -1,25 +1,39 @@
 # 🤖 Multi-Agent Research System
 
-Distributed AI research system built with specialized agents running as Kubernetes microservices. Each agent is an independent service with specific expertise, collaborating to conduct comprehensive research on any topic.
+A distributed AI research system with **two implementation versions**: Custom REST API and standards-compliant A2A Protocol. Each agent is an independent microservice with specialized expertise, collaborating to conduct comprehensive research on any topic.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io/)
-[![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 [![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+
+## 🎯 Two Versions Available
+
+This repository contains **two complete implementations**:
+
+### **1. REST API Version** (Original)
+- Custom REST endpoints
+- Simpler architecture
+- ~5-10% faster
+
+### **2. A2A Protocol Version** (Standards-Compliant)
+- Google's Agent-to-Agent protocol
+- Standardized messages (`agent://` URIs)
+- Capability discovery (`GET /capabilities`)
+
+**Choose your version based on your needs!** See [REST-vs-A2A.md](docs/REST-vs-A2A.md) for detailed comparison.
 
 ## ✨ Features
 
-- **🎯 Specialized AI Agents** - 5 independent agents, each with unique expertise and LLM configuration
-- **☸️ Kubernetes-Native** - Fully containerized, cloud-ready architecture
-- **🔄 Asynchronous Workflow** - Non-blocking research tasks with real-time progress updates
-- **📊 State Management** - Redis-backed shared state for agent coordination
-- **🎨 Interactive UI** - Beautiful Streamlit interface for research management
-- **📈 Horizontal Scaling** - Scale individual agents based on workload
-- **🔍 Real-time Monitoring** - Live agent activity tracking and logging
+- **🎯 Specialized AI Agents** - 5 independent agents with unique expertise
+- **☸️ Kubernetes-Native** - Fully containerized, cloud-ready
+- **🔄 Dual Protocols** - Choose REST or A2A
+- **📊 State Management** - Redis-backed shared state
+- **🎨 Interactive UI** - Streamlit interface
+- **📈 Horizontal Scaling** - Scale agents independently
+- **🔍 Real-time Monitoring** - Live agent activity tracking
+- **🔄 Agent Reusability** - Use agents in other applications
 
 ## 🏗️ Architecture
-
-The system uses a microservices architecture where each agent runs as an independent Kubernetes pod with specialized responsibilities.
 
 ### System Overview
 
@@ -41,13 +55,14 @@ The system uses a microservices architecture where each agent runs as an indepen
 │  │  ┌──────────────────────────────────────────────────────────┐  │    │
 │  │  │  Coordinator Service (Pod)                                │  │    │
 │  │  │  - Port: 8006                                             │  │    │
+│  │  │  - REST: Custom messages                                  │  │    │
+│  │  │  - A2A: agent:// URIs                                     │  │    │
 │  │  │  - Workflow Management                                    │  │    │
-│  │  │  - Agent Communication                                    │  │    │
-│  │  │  - Decision Logic                                         │  │    │
 │  │  └────┬────────┬────────┬────────┬────────┬─────────────────┘  │    │
 │  └───────┼────────┼────────┼────────┼────────┼────────────────────┘    │
 │          │        │        │        │        │                         │
 │          │ REST   │ REST   │ REST   │ REST   │ REST                    │
+│          │ or A2A │ or A2A │ or A2A │ or A2A │ or A2A                  │
 │          │        │        │        │        │                         │
 │  ┌───────▼────────▼────────▼────────▼────────▼────────────────────┐    │
 │  │                      Agent Layer                               │    │
@@ -92,8 +107,13 @@ The system uses a microservices architecture where each agent runs as an indepen
 │  │  │  - Shared State Store                                     │  │    │
 │  │  │  - Task Management                                        │  │    │
 │  │  │  - Inter-Agent Communication                              │  │    │
+│  │  │  - Research Progress Tracking                             │  │    │
 │  │  └──────────────────────────────────────────────────────────┘  │    │
 │  └─────────────────────────────────────────────────────────────────┘    │
+│                                                                          │
+│  Legend:                                                                │
+│  🎯 Topic Refiner    ❓ Question Architect    🔍 Search Strategist      │
+│  📊 Data Analyst     📝 Report Writer                                   │
 │                                                                          │
 └─────────────────────────────────────────────────────────────────────────┘
 
@@ -107,7 +127,7 @@ The system uses a microservices architecture where each agent runs as an indepen
          for intelligence
 ```
 
-### Agent Team
+### The Agent Team
 
 Each agent is a specialized microservice with its own LLM instance, personality, and expertise:
 
@@ -162,17 +182,6 @@ Each agent is a specialized microservice with its own LLM instance, personality,
   - Formats output professionally
   - Adds metadata and research statistics
   - Creates executive summaries
-
-#### 🎭 **Chief Coordinator** (Port 8006)
-- **Role**: Research Coordination Specialist
-- **Expertise**: Managing multi-agent workflows and decision-making
-- **Temperature**: 0.2 (Highly deterministic)
-- **Responsibilities**:
-  - Orchestrates the complete research workflow
-  - Routes messages between agents
-  - Makes decisions on research continuation
-  - Manages task state and progress
-  - Handles errors and retries
 
 ### Research Workflow
 
@@ -237,7 +246,9 @@ Each agent is a specialized microservice with its own LLM instance, personality,
 - **Synchronous**: HTTP/REST API calls between coordinator and agents
 - **Asynchronous**: Background task processing for long-running research
 - **State Management**: Redis for shared state across all services
-- **Message Format**: Standardized JSON payload with task tracking
+- **Message Format**: 
+  - REST: Custom JSON payload
+  - A2A: Standardized `@type` based messages
 
 #### 🔄 **Workflow Orchestration**
 - **Dynamic Routing**: Coordinator decides when to continue or finalize research
@@ -254,7 +265,7 @@ Each agent is a specialized microservice with its own LLM instance, personality,
 
 #### 🎚️ **Temperature Settings**
 Each agent uses specific temperature settings for optimal performance:
-- **0.2-0.3**: Deterministic (Coordinator, Search Strategist)
+- **0.2-0.3**: Deterministic (Search Strategist)
 - **0.4-0.5**: Analytical (Data Analyst, Topic Refiner)
 - **0.6-0.7**: Balanced creativity (Report Writer, Question Architect)
 
@@ -262,7 +273,7 @@ Each agent uses specific temperature settings for optimal performance:
 
 ### Prerequisites
 
-- **[Kind](https://kind.sigs.k8s.io/docs/user/quick-start/)** (Kubernetes in Docker) - Required for local deployment
+- **[Kind](https://kind.sigs.k8s.io/)** (Kubernetes in Docker) - **Required**
 - **[kubectl](https://kubernetes.io/docs/tasks/tools/)** - Kubernetes CLI
 - **[Docker](https://docs.docker.com/get-docker/)** - Container runtime
 - **Google API Key** - For Gemini LLM ([Get one here](https://makersuite.google.com/app/apikey))
@@ -277,10 +288,7 @@ Each agent uses specific temperature settings for optimal performance:
 
 2. **Create a Kind cluster**
    ```bash
-   # Create a new Kind cluster
    kind create cluster --name research-cluster
-   
-   # Verify cluster is running
    kubectl cluster-info --context kind-research-cluster
    ```
 
@@ -289,22 +297,24 @@ Each agent uses specific temperature settings for optimal performance:
    export GOOGLE_API_KEY="your-google-api-key-here"
    ```
 
-4. **Deploy the system**
+4. **Deploy your chosen version**
+
+   **Option A: REST API Version**
    ```bash
-   # Make scripts executable
-   chmod +x scripts/*.sh
-   
-   # Deploy to Kind cluster
+   chmod +x scripts/deploy-to-kind.sh
    ./scripts/deploy-to-kind.sh
+   ```
+
+   **Option B: A2A Protocol Version**
+   ```bash
+   chmod +x scripts/deploy-a2a-to-kind.sh
+   ./scripts/deploy-a2a-to-kind.sh
    ```
 
 5. **Access the application**
    ```bash
-   # Port forward to access the UI
    kubectl port-forward service/streamlit-service 8501:80
-   
-   # Open in browser
-   open http://localhost:8501
+   # Open http://localhost:8501
    ```
 
 ## 📖 Usage
@@ -312,7 +322,7 @@ Each agent uses specific temperature settings for optimal performance:
 ### Conducting Research
 
 1. Open the Streamlit UI at `http://localhost:8501`
-2. Enter your research topic (e.g., "Benefits of multi-agent AI systems")
+2. Enter your research topic (e.g., "Benefits of microservices architecture")
 3. Adjust max iterations (1-5) in the sidebar
 4. Click "🚀 Deploy Agents"
 5. Watch the agents collaborate in real-time
@@ -321,42 +331,89 @@ Each agent uses specific temperature settings for optimal performance:
 ### Example Topics
 
 - "Top 3 F1 drivers of all time"
-- "Benefits of Kubernetes for AI workloads"
 - "Latest developments in quantum computing"
+- "Benefits of Kubernetes for AI workloads"
 - "Impact of microservices on system design"
-- "Advantages of multi-agent architectures"
 
-## 🛠️ Development
-
-### Project Structure
+## 📁 Repository Structure
 
 ```
 multi-agent-research-system/
-├── agents/              # Agent microservices
-├── coordinator/         # Workflow orchestrator
-├── frontend/           # Streamlit UI
-├── shared/             # Common code
-├── docker/             # Dockerfiles
-├── kubernetes/         # K8s manifests
-├── requirements/       # Python dependencies
-├── scripts/            # Automation scripts
-└── docs/              # Documentation
+│
+├── agents/                      # Agent implementations
+│   ├── *_service.py            # REST API versions
+│   ├── *_a2a.py                # A2A Protocol versions
+│   ├── base_agent.py           # REST base class
+│   └── a2a_base_agent.py       # A2A base class
+│
+├── coordinator/                 # Workflow orchestrators
+│   ├── coordinator_service.py  # REST version
+│   └── coordinator_a2a.py      # A2A version
+│
+├── frontend/                    # User interface
+│   └── streamlit_frontend.py   # Streamlit web UI
+│
+├── shared/                      # Common code
+│   ├── shared_models.py        # REST models
+│   └── a2a_models.py           # A2A protocol models
+│
+├── kubernetes/                  # Deployment manifests
+│   ├── deployments.yaml        # REST version
+│   └── deployments-a2a.yaml    # A2A version
+│
+├── docker/                      # Container definitions
+│   ├── Dockerfile.agent        # Agent services
+│   ├── Dockerfile.coordinator  # REST coordinator
+│   ├── Dockerfile.coordinator-a2a  # A2A coordinator
+│   └── Dockerfile.streamlit    # Frontend
+│
+├── requirements/                # Python dependencies
+│   ├── requirements-agent.txt
+│   ├── requirements-coordinator.txt
+│   └── requirements-streamlit.txt
+│
+├── scripts/                     # Automation scripts
+│   ├── deploy-to-kind.sh       # Deploy REST version
+│   ├── deploy-a2a-to-kind.sh   # Deploy A2A version
+│   ├── cleanup.sh              # Cleanup/management
+│   └── debug-connectivity.sh   # Troubleshooting
+│
+├── docs/                        # Documentation
+│   ├── architecture.md         # Detailed architecture
+│   ├── REST-vs-A2A.md         # Version comparison
+│   ├── deployment.md           # Deployment guide
+│   └── troubleshooting.md      # Common issues
+│
+└── examples/                    # Usage examples
+    ├── custom-workflows/       # Custom agent workflows
+    └── integrations/           # Framework integrations
 ```
 
-### Building Individual Services
+## 🔄 Switching Between Versions
 
 ```bash
-# Build a specific agent
-docker build --build-arg SERVICE_FILE=agents/topic_refiner_service.py \
-  --build-arg PORT=8001 -f docker/Dockerfile.agent \
-  -t multi-agent-research/topic-refiner:latest .
+# Clean current deployment
+./scripts/cleanup.sh  # Choose option 1
 
-# Load into Kind
-kind load docker-image multi-agent-research/topic-refiner:latest
+# Deploy REST version
+./scripts/deploy-to-kind.sh
 
-# Restart deployment
-kubectl rollout restart deployment/topic-refiner
+# OR deploy A2A version
+./scripts/deploy-a2a-to-kind.sh
 ```
+
+## 🔄 Reusing Agents
+
+Agents can be used in other applications! See [examples/](examples/) for:
+
+- **FAQ Generator** - Auto-generate FAQs for any topic
+- **Content Writer** - Create articles with AI assistance
+- **Search Assistant** - Enhanced search with analysis
+- **FastAPI Service** - Expose agents as REST APIs
+
+Full guide: [docs/agent-reuse.md](docs/agent-reuse.md)
+
+## 🛠️ Development
 
 ### Scaling Agents
 
@@ -366,13 +423,23 @@ kubectl scale deployment/search-strategist --replicas=3
 
 # Scale all agents
 kubectl scale deployment/topic-refiner --replicas=2
-kubectl scale deployment/question-architect --replicas=2
-kubectl scale deployment/data-analyst --replicas=2
+```
+
+### Monitoring
+
+```bash
+# View all pods
+kubectl get pods
+
+# Watch coordinator logs
+kubectl logs -f deployment/coordinator
+
+# Check agent capabilities (A2A version)
+kubectl port-forward service/topic-refiner-service 8001:8001
+curl http://localhost:8001/capabilities
 ```
 
 ## 🧹 Management
-
-### Cleanup
 
 ```bash
 # Interactive cleanup menu
@@ -386,22 +453,6 @@ kubectl scale deployment/data-analyst --replicas=2
 # 5. Restart all pods
 ```
 
-### Monitoring
-
-```bash
-# View all pods
-kubectl get pods
-
-# Watch logs
-kubectl logs -f deployment/coordinator
-
-# Check service health
-kubectl get services
-
-# Debug connectivity
-./scripts/debug-connectivity.sh
-```
-
 ## 📊 Resource Requirements
 
 **Minimum (1 replica each):**
@@ -409,130 +460,35 @@ kubectl get services
 - CPU: ~3.5 cores
 - Storage: ~2 GiB
 
-**Recommended:**
-- Memory: ~14 GiB  
+**Recommended (scaled):**
+- Memory: ~14 GiB
 - CPU: ~8 cores
-- Storage: ~5 GiB
-
-## 🔧 Configuration
-
-### Environment Variables
-
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `GOOGLE_API_KEY` | Google Gemini API key | - | ✅ Yes |
-| `REDIS_HOST` | Redis hostname | redis-service | No |
-| `REDIS_PORT` | Redis port | 6379 | No |
-| `COORDINATOR_URL` | Coordinator service URL | http://coordinator-service:8006 | No |
-
-### Customizing Agents
-
-Edit agent parameters in their respective service files:
-
-```python
-# agents/topic_refiner_service.py
-class TopicRefinerAgent(BaseAgent):
-    def __init__(self):
-        super().__init__(
-            name="Dr. Topic Refiner",
-            temperature=0.5,  # Adjust creativity
-            # ...
-        )
-```
 
 ## 🐛 Troubleshooting
 
-### Common Issues
-
-**Pods not starting?**
 ```bash
-kubectl describe pod <pod-name>
-kubectl logs <pod-name>
-```
-
-**Connection errors?**
-```bash
+# Debug connectivity
 ./scripts/debug-connectivity.sh
+
+# Check pod status
+kubectl get pods
+
+# View logs
+kubectl logs <pod-name>
+
+# Describe pod
+kubectl describe pod <pod-name>
 ```
 
-**Image pull errors in Kind?**
-```bash
-# Reload images
-kind load docker-image multi-agent-research/coordinator:latest
-```
-
-See [docs/troubleshooting.md](docs/troubleshooting.md) for more details.
-
-## 🔄 Reusing Agents
-
-The agents are designed as independent, reusable components that can be integrated into other applications!
-
-### As Python Library
-
-```python
-from agents.topic_refiner_service import TopicRefinerAgent
-from agents.question_architect_service import QuestionArchitectAgent
-
-# Use agents directly in your code
-refiner = TopicRefinerAgent()
-architect = QuestionArchitectAgent()
-
-refined_topic = refiner.refine_topic("machine learning")
-questions = architect.generate_questions(refined_topic, 0)
-```
-
-### As REST API
-
-```bash
-# Deploy individual agents as APIs
-docker run -p 8001:8001 -e GOOGLE_API_KEY="key" \
-  multi-agent-research/topic-refiner:latest
-
-# Call from any language
-curl -X POST http://localhost:8001/process \
-  -H "Content-Type: application/json" \
-  -d '{"task_id": "123", "action": "refine_topic", ...}'
-```
-
-### Custom Workflows
-
-Build your own workflows with any combination of agents:
-
-```python
-# Example: FAQ Generator
-class FAQGenerator:
-    def __init__(self):
-        self.architect = QuestionArchitectAgent()
-        self.searcher = SearchStrategistAgent()
-    
-    def generate_faq(self, topic: str):
-        questions = self.architect.generate_questions(topic, 0)
-        answers = [self.searcher.execute_search(q) for q in questions]
-        return zip(questions, answers)
-```
-
-**📖 See [AGENT-REUSE.md](docs/agent-reuse.md) for detailed integration examples including:**
-- Standalone Python usage
-- REST API integration
-- Message queue patterns
-- Serverless deployment
-- Node.js wrappers
-- Custom workflow examples
-
-**💡 Example Applications** (in `examples/` directory):
-- **FAQ Generator** - Auto-generate FAQs for any topic
-- **Content Writer** - Create articles with AI assistance
-- **Search Assistant** - Enhanced search with analysis
-- **FastAPI Service** - Expose agents as REST APIs
-- **Flask Integration** - Web application examples
-- **Jupyter Notebooks** - Interactive agent exploration
+See [docs/troubleshooting.md](docs/troubleshooting.md) for detailed solutions.
 
 ## 📚 Documentation
 
-- [Architecture Details](docs/architecture.md)
-- [Deployment Guide](docs/deployment.md)
-- [Troubleshooting](docs/troubleshooting.md)
-- [Contributing](docs/contributing.md)
+- [Architecture Details](docs/architecture.md) - System design and data flow
+- [REST vs A2A Comparison](docs/REST-vs-A2A.md) - Version differences
+- [Deployment Guide](docs/deployment.md) - Advanced deployment scenarios
+- [Troubleshooting](docs/troubleshooting.md) - Common issues and solutions
+- [Agent Reusability](docs/agent-reuse.md) - Using agents in other apps
 
 ## 🤝 Contributing
 
@@ -544,21 +500,20 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
+See [docs/contributing.md](docs/contributing.md) for guidelines.
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
+- Inspiration taken from [KodeCloud - LangGraph labs](https://learn.kodekloud.com/user/courses/youtube-labs-langgraph)
 - Built with [LangChain](https://www.langchain.com/) and [Google Gemini](https://ai.google.dev/)
 - UI powered by [Streamlit](https://streamlit.io/)
 - Orchestrated with [Kubernetes](https://kubernetes.io/)
 - Search via [DuckDuckGo](https://duckduckgo.com/)
-
-## 📧 Contact
-
-- GitHub Issues: [Report a bug](https://github.com/yourusername/multi-agent-research-system/issues)
-- Discussions: [Ask questions](https://github.com/yourusername/multi-agent-research-system/discussions)
+- A2A Protocol by [Google](https://github.com/google/a2a)
 
 ---
 
