@@ -33,12 +33,12 @@ This repository contains **two complete implementations**:
 - **🔍 Real-time Monitoring** - Live agent activity tracking
 - **🔄 Agent Reusability** - Use agents in other applications
 
-## 🏗️ Architecture
+## 🗂️ Architecture
 
 ### System Overview
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────┐
 │                          Kubernetes Cluster                              │
 │                                                                          │
 │  ┌────────────────────────────────────────────────────────────────┐    │
@@ -47,10 +47,10 @@ This repository contains **two complete implementations**:
 │  │  │  Streamlit UI (Pod)                                       │  │    │
 │  │  │  - Port: 8501                                             │  │    │
 │  │  │  - User Interface & Visualization                         │  │    │
-│  │  └────────────────────────┬─────────────────────────────────┘  │    │
-│  └───────────────────────────┼────────────────────────────────────┘    │
+│  │  └────────────────────┬─────────────────────────────────────┘  │    │
+│  └───────────────────────┼────────────────────────────────────────┘    │
 │                               │ HTTP/REST                               │
-│  ┌───────────────────────────▼────────────────────────────────────┐    │
+│  ┌───────────────────────▼────────────────────────────────────────┐    │
 │  │                   Orchestration Layer                          │    │
 │  │  ┌──────────────────────────────────────────────────────────┐  │    │
 │  │  │  Coordinator Service (Pod)                                │  │    │
@@ -58,16 +58,16 @@ This repository contains **two complete implementations**:
 │  │  │  - REST: Custom messages                                  │  │    │
 │  │  │  - A2A: agent:// URIs                                     │  │    │
 │  │  │  - Workflow Management                                    │  │    │
-│  │  └────┬────────┬────────┬────────┬────────┬─────────────────┘  │    │
-│  └───────┼────────┼────────┼────────┼────────┼────────────────────┘    │
+│  │  └─────┬────────┬────────┬────────┬────────────────────────┘  │    │
+│  └───────┼────────┼────────┼────────┼───────────────────────────┘    │
 │          │        │        │        │        │                         │
 │          │ REST   │ REST   │ REST   │ REST   │ REST                    │
 │          │ or A2A │ or A2A │ or A2A │ or A2A │ or A2A                  │
 │          │        │        │        │        │                         │
-│  ┌───────▼────────▼────────▼────────▼────────▼────────────────────┐    │
+│  ┌───────▼────────▼────────▼────────▼────────▼───────────────────┐    │
 │  │                      Agent Layer                               │    │
 │  │                                                                 │    │
-│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐    │    │
+│  │  ┌─────────────┐  ┌─────────────┐  ┌────────────────────┐    │    │
 │  │  │   Topic     │  │  Question   │  │      Search         │    │    │
 │  │  │   Refiner   │  │  Architect  │  │    Strategist       │    │    │
 │  │  │  🎯 :8001   │  │  ❓ :8002   │  │     🔍 :8003        │    │    │
@@ -115,7 +115,7 @@ This repository contains **two complete implementations**:
 │  🎯 Topic Refiner    ❓ Question Architect    🔍 Search Strategist      │
 │  📊 Data Analyst     📝 Report Writer                                   │
 │                                                                          │
-└─────────────────────────────────────────────────────────────────────────┘
+└──────────────────────────────────────────────────────────────────────────┘
 
          External Services
          ┌─────────────────┐
@@ -192,30 +192,30 @@ Each agent is a specialized microservice with its own LLM instance, personality,
 └────┬────┘
      │
      ▼
-┌─────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────┐
 │                        Research Workflow                             │
 │                                                                      │
 │  1. Topic Refiner (🎯)                                              │
 │     Input: Raw topic                                                │
 │     Output: Refined, focused research topic                         │
-│     └─────────────────────────────────────────────┐                 │
+│     └───────────────────────────────────────────────                 │
 │                                                    ▼                 │
 │  2. Question Architect (❓)                                         │
 │     Input: Refined topic                                            │
 │     Output: 3 specific research questions                           │
-│     └─────────────────────────────────────────────┐                 │
+│     └───────────────────────────────────────────────                 │
 │                                                    ▼                 │
 │  3. Search Strategist (🔍)                                          │
 │     Input: Research questions                                       │
 │     Process: Optimize queries → Execute searches                    │
 │     Output: Search results from DuckDuckGo                          │
-│     └─────────────────────────────────────────────┐                 │
+│     └───────────────────────────────────────────────                 │
 │                                                    ▼                 │
 │  4. Data Analyst (📊)                                               │
 │     Input: Search results                                           │
 │     Process: Extract insights → Calculate quality                   │
 │     Output: Key findings + quality score                            │
-│     └─────────────────────────────────────────────┐                 │
+│     └───────────────────────────────────────────────                 │
 │                                                    ▼                 │
 │  5. Coordinator Decision (🎭)                                       │
 │     Evaluate: Quality score, iterations, findings count             │
@@ -230,7 +230,7 @@ Each agent is a specialized microservice with its own LLM instance, personality,
 │           YES                                 ▼                     │
 │            │                        6. Report Writer (📝)          │
 │            │                           Input: All findings          │
-│            └─────────────────────────▶ Output: Formatted report    │
+│            └──────────────────────────▶ Output: Formatted report    │
 │                                                │                    │
 └────────────────────────────────────────────────┼────────────────────┘
                                                  ▼
@@ -273,12 +273,16 @@ Each agent uses specific temperature settings for optimal performance:
 
 ### Prerequisites
 
-- **[Kind](https://kind.sigs.k8s.io/)** (Kubernetes in Docker) - **Required**
+- **Kubernetes Cluster** - Either:
+  - **[Kind](https://kind.sigs.k8s.io/)** (Kubernetes in Docker) for local development
+  - **[kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/)** for production-ready clusters
 - **[kubectl](https://kubernetes.io/docs/tasks/tools/)** - Kubernetes CLI
 - **[Docker](https://docs.docker.com/get-docker/)** - Container runtime
 - **Google API Key** - For Gemini LLM ([Get one here](https://makersuite.google.com/app/apikey))
 
 ### Installation
+
+#### Option 1: Kind Cluster (Development)
 
 1. **Clone the repository**
    ```bash
@@ -299,13 +303,13 @@ Each agent uses specific temperature settings for optimal performance:
 
 4. **Deploy your chosen version**
 
-   **Option A: REST API Version**
+   **REST API Version:**
    ```bash
    chmod +x scripts/deploy-to-kind.sh
    ./scripts/deploy-to-kind.sh
    ```
 
-   **Option B: A2A Protocol Version**
+   **A2A Protocol Version:**
    ```bash
    chmod +x scripts/deploy-a2a-to-kind.sh
    ./scripts/deploy-a2a-to-kind.sh
@@ -316,6 +320,50 @@ Each agent uses specific temperature settings for optimal performance:
    kubectl port-forward service/streamlit-service 8501:80
    # Open http://localhost:8501
    ```
+
+#### Option 2: kubeadm Cluster with Local Registry
+
+For kubeadm clusters using a local registry (e.g., `lynx.tigera.local`):
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/multi-agent-research-system.git
+   cd multi-agent-research-system
+   ```
+
+2. **Ensure your local registry is accessible**
+   ```bash
+   # Verify registry connectivity
+   curl -X GET http://lynx.tigera.local/v2/_catalog
+   
+   # Ensure kubeconfig is set
+   kubectl cluster-info
+   ```
+
+3. **Set your Google API key**
+   ```bash
+   export GOOGLE_API_KEY="your-google-api-key-here"
+   ```
+
+4. **Deploy A2A Protocol version**
+   ```bash
+   chmod +x scripts/deploy-a2a-to-kubeadm.sh
+   ./scripts/deploy-a2a-to-kubeadm.sh
+   ```
+
+   This script will:
+   - Build all container images
+   - Tag them for your local registry (`lynx.tigera.local/multi-agent-research`)
+   - Push images to the registry
+   - Deploy to your kubeadm cluster
+
+5. **Access the application**
+   ```bash
+   kubectl port-forward service/streamlit-service 8501:80
+   # Open http://localhost:8501
+   ```
+
+> **Note:** The kubeadm deployment script uses the local registry at `lynx.tigera.local`. If you're using a different registry, modify the `REGISTRY` variable in `scripts/deploy-a2a-to-kubeadm.sh` accordingly.
 
 ## 📖 Usage
 
@@ -374,7 +422,8 @@ multi-agent-research-system/
 │
 ├── scripts/                     # Automation scripts
 │   ├── deploy-to-kind.sh       # Deploy REST version
-│   ├── deploy-a2a-to-kind.sh   # Deploy A2A version
+│   ├── deploy-a2a-to-kind.sh   # Deploy A2A version (Kind)
+│   ├── deploy-a2a-to-kubeadm.sh # Deploy A2A version (kubeadm)
 │   ├── cleanup.sh              # Cleanup/management
 │   └── debug-connectivity.sh   # Troubleshooting
 │
@@ -395,11 +444,14 @@ multi-agent-research-system/
 # Clean current deployment
 ./scripts/cleanup.sh  # Choose option 1
 
-# Deploy REST version
+# Deploy REST version (Kind)
 ./scripts/deploy-to-kind.sh
 
-# OR deploy A2A version
+# OR deploy A2A version (Kind)
 ./scripts/deploy-a2a-to-kind.sh
+
+# OR deploy A2A version (kubeadm with local registry)
+./scripts/deploy-a2a-to-kubeadm.sh
 ```
 
 ## 🔄 Reusing Agents
@@ -464,7 +516,7 @@ curl http://localhost:8001/capabilities
 - Memory: ~14 GiB
 - CPU: ~8 cores
 
-## 🐛 Troubleshooting
+## 🛠 Troubleshooting
 
 ```bash
 # Debug connectivity
