@@ -156,12 +156,16 @@ Focus on your specific role and provide high-quality output."""
                 
         except Exception as e:
             print(f"[{self.name}] Error processing message: {e}")
+            import traceback
+            traceback.print_exc()
+            
             return create_error_message(
                 message_id=str(uuid.uuid4()),
                 to=message.from_agent,
                 from_agent=self.agent_id,
                 code="PROCESSING_ERROR",
                 message=str(e),
+                details={"traceback": traceback.format_exc()},
                 reply_to=message.id
             )
     
@@ -216,15 +220,22 @@ Focus on your specific role and provide high-quality output."""
             )
             
         except Exception as e:
-            # Create error response
-            return create_action_response(
+            print(f"[{self.name}] Error executing action {action_request.action}: {e}")
+            import traceback
+            traceback.print_exc()
+            
+            # Create error response using proper error message function
+            return create_error_message(
                 message_id=str(uuid.uuid4()),
                 to=message.from_agent,
                 from_agent=self.agent_id,
-                action=action_request.action,
-                result={},
-                status=MessageStatus.FAILED,
-                error=str(e),
+                code="ACTION_EXECUTION_ERROR",
+                message=f"Failed to execute action '{action_request.action}': {str(e)}",
+                details={
+                    "action": action_request.action,
+                    "parameters": action_request.parameters,
+                    "traceback": traceback.format_exc()
+                },
                 reply_to=message.id
             )
     
@@ -252,14 +263,34 @@ Focus on your specific role and provide high-quality output."""
                 "agent_id": self.agent_id
             }
         
-        @app.post("/message", response_model=A2AMessage)
-        async def receive_message(message: A2AMessage) -> A2AMessage:
+        @app.post("/message")
+        async def receive_message(message: A2AMessage):
             """
             A2A Protocol endpoint
             Receives A2A messages and returns A2A responses
+            
+            NOTE: We return a dict instead of A2AMessage to work around a Pydantic bug
+            where Union types only serialize the discriminator field (@type) and drop
+            all other fields when using response_model=A2AMessage.
             """
             response = await self.process_message(message)
-            return response
+            
+            # WORKAROUND: Manually serialize to fix Pydantic Union serialization bug
+            # The issue: Pydantic only serializes the @type discriminator for Union fields
+            # The fix: Manually serialize the content object and return a plain dict
+            response_dict = {
+                "@type": response.type,
+                "id": response.id,
+                "to": response.to,
+                "from": response.from_agent,
+                "content": json.loads(response.content.model_dump_json(by_alias=True, exclude_none=True)),
+                "timestamp": response.timestamp,
+                "metadata": response.metadata
+            }
+            if response.reply_to:
+                response_dict["reply_to"] = response.reply_to
+            
+            return response_dict
         
         @app.get("/capabilities")
         async def get_capabilities():

@@ -1,6 +1,6 @@
 """
 coordinator_a2a.py
-Coordinator Service - A2A Protocol Implementation
+Coordinator Service - A2A Protocol Implementation (FIXED)
 Orchestrates the multi-agent workflow using A2A messages
 """
 
@@ -16,7 +16,7 @@ import asyncio
 from datetime import datetime
 from shared.a2a_models import (
     A2AMessage, MessageStatus, create_action_request,
-    AGENT_URIS, AGENT_SERVICES
+    AGENT_URIS, AGENT_SERVICES, A2AActionResponse, A2AError
 )
 
 
@@ -45,12 +45,30 @@ class A2ACoordinator:
         try:
             print(f"[Coordinator] Sending message to {agent_uri}")
             async with httpx.AsyncClient(timeout=120.0) as client:
-                response = await client.post(
-                    url,
-                    json=message.model_dump(by_alias=True, exclude_none=True)
-                )
+                # WORKAROUND: Manually serialize content to fix Pydantic Union serialization bug
+                # The issue: Pydantic only serializes the @type discriminator for Union fields
+                # The fix: Manually serialize the content object and construct the message dict
+                message_dict = {
+                    "@type": message.type,
+                    "id": message.id,
+                    "to": message.to,
+                    "from": message.from_agent,
+                    "content": json.loads(message.content.model_dump_json(by_alias=True, exclude_none=True)),
+                    "timestamp": message.timestamp,
+                    "metadata": message.metadata
+                }
+                if message.reply_to:
+                    message_dict["reply_to"] = message.reply_to
+                
+                print(f"[Coordinator] Message payload: {json.dumps(message_dict, indent=2)}")
+                
+                response = await client.post(url, json=message_dict)
                 response.raise_for_status()
                 response_data = response.json()
+                
+                print(f"[Coordinator] Received response: {json.dumps(response_data, indent=2)}")
+                
+                # Parse the response back into A2AMessage
                 return A2AMessage(**response_data)
                 
         except httpx.ConnectError as e:
@@ -84,15 +102,47 @@ class A2ACoordinator:
         # Send message and get response
         response = await self.send_message(agent_uri, message)
         
-        # Check if response is an action response
-        if hasattr(response.content, 'status'):
+        # Debug: Print response structure
+        print(f"[Coordinator] Response type: {type(response)}")
+        print(f"[Coordinator] Response content type: {type(response.content)}")
+        print(f"[Coordinator] Response content: {response.content}")
+        
+        # Check if response content is an A2AActionResponse
+        if isinstance(response.content, A2AActionResponse):
             if response.content.status == MessageStatus.COMPLETED:
                 return response.content.result
             else:
                 error = response.content.error or "Action failed"
                 raise Exception(f"Action {action} failed: {error}")
-        else:
-            raise Exception(f"Unexpected response type from {agent_uri}")
+        
+        # Check if it's an error response
+        elif isinstance(response.content, A2AError):
+            raise Exception(f"Agent error: {response.content.message}")
+        
+        # Try to access as dict (fallback)
+        elif hasattr(response.content, '__dict__'):
+            content_dict = response.content.__dict__
+            if 'status' in content_dict:
+                if content_dict['status'] == MessageStatus.COMPLETED:
+                    return content_dict.get('result', {})
+                else:
+                    error = content_dict.get('error', 'Action failed')
+                    raise Exception(f"Action {action} failed: {error}")
+        
+        # Last resort: check for status attribute
+        elif hasattr(response.content, 'status'):
+            if response.content.status == MessageStatus.COMPLETED:
+                return response.content.result if hasattr(response.content, 'result') else {}
+            else:
+                error = response.content.error if hasattr(response.content, 'error') else "Action failed"
+                raise Exception(f"Action {action} failed: {error}")
+        
+        # If none of the above worked, raise an error
+        raise Exception(
+            f"Unexpected response type from {agent_uri}. "
+            f"Content type: {type(response.content)}, "
+            f"Content: {response.content}"
+        )
     
     def get_state(self, task_id: str) -> dict:
         """Get current state"""

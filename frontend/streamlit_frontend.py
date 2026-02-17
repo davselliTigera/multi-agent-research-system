@@ -9,8 +9,13 @@ import time
 import os
 from shared.shared_models import AGENT_INFO
 
-# Configuration
-COORDINATOR_URL = os.getenv("COORDINATOR_URL", "http://coordinator-service:8006")
+# Configuration - auto-detect local vs Kubernetes
+default_url = "http://coordinator-service:8006"  # Kubernetes default
+if os.path.exists("venv") or os.path.exists(".env.local"):
+    # Likely running locally
+    default_url = "http://localhost:8006"
+
+COORDINATOR_URL = os.getenv("COORDINATOR_URL", default_url)
 
 st.set_page_config(
     page_title="Multi-Agent Research System",
@@ -37,7 +42,7 @@ except Exception as e:
     The frontend cannot connect to the coordinator service.
     
     **Quick Fix:**
-    ```bash
+```bash
     # Check if coordinator is running
     kubectl get pods | grep coordinator
     
@@ -49,7 +54,7 @@ except Exception as e:
     
     # If using port-forward, ensure coordinator is accessible:
     kubectl port-forward service/coordinator-service 8006:8006
-    ```
+```
     
     Current COORDINATOR_URL: `{COORDINATOR_URL}`
     """)
@@ -297,7 +302,7 @@ with col2:
     st.subheader("🗺️ Microservice Architecture")
     
     st.markdown("""
-    ```mermaid
+```mermaid
     graph TD
         UI[Streamlit UI] --> CO[Coordinator Service]
         CO --> TR[Topic Refiner Pod]
@@ -316,7 +321,7 @@ with col2:
         style UI fill:#e8f5e9
         style CO fill:#fff3e0
         style Redis fill:#fce4ec
-    ```
+```
     """)
     
     st.markdown("---")

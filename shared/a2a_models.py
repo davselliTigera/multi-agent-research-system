@@ -1,11 +1,11 @@
 """
-a2a_models.py
+a2a_models.py (FIXED)
 Agent-to-Agent (A2A) Protocol Implementation
 Based on Google's A2A specification
 """
 
-from typing import Optional, Dict, Any, List, Literal
-from pydantic import BaseModel, Field
+from typing import Optional, Dict, Any, List, Literal, Union
+from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
 from enum import Enum
 
@@ -99,6 +99,17 @@ class A2AStatusUpdate(A2AContent):
     message: Optional[str] = None
 
 
+# Union type for content with discriminator
+A2AContentUnion = Union[
+    A2AActionRequest,
+    A2AActionResponse,
+    A2ACapabilityRequest,
+    A2ACapabilityResponse,
+    A2AError,
+    A2AStatusUpdate
+]
+
+
 class A2AMessage(BaseModel):
     """
     A2A Protocol Message
@@ -108,10 +119,46 @@ class A2AMessage(BaseModel):
     id: str = Field(description="Unique message ID")
     to: str = Field(description="Recipient agent ID (e.g., agent://topic-refiner)")
     from_agent: str = Field(alias="from", description="Sender agent ID")
-    content: A2AContent = Field(description="Message content")
+    content: A2AContentUnion = Field(description="Message content")
     reply_to: Optional[str] = Field(default=None, description="ID of message being replied to")
     timestamp: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
     metadata: Dict[str, Any] = Field(default_factory=dict)
+    
+    @field_validator('content', mode='before')
+    @classmethod
+    def parse_content(cls, v):
+        """Parse content based on @type discriminator"""
+        if isinstance(v, dict):
+            content_type = v.get('@type') or v.get('type')
+            
+            if content_type == 'ActionRequest':
+                return A2AActionRequest(**v)
+            elif content_type == 'ActionResponse':
+                return A2AActionResponse(**v)
+            elif content_type == 'CapabilityRequest':
+                return A2ACapabilityRequest(**v)
+            elif content_type == 'CapabilityResponse':
+                return A2ACapabilityResponse(**v)
+            elif content_type == 'Error':
+                return A2AError(**v)
+            elif content_type == 'StatusUpdate':
+                return A2AStatusUpdate(**v)
+            else:
+                raise ValueError(f"Unknown content type: {content_type}")
+        
+        return v
+    
+    def model_dump(self, **kwargs):
+        """Override model_dump to properly serialize Union content types"""
+        # Get the base serialization
+        data = super().model_dump(**kwargs)
+        
+        # Manually serialize the content field to ensure all fields are included
+        if hasattr(self.content, 'model_dump'):
+            # Use the same kwargs (by_alias, exclude_none, etc.)
+            data['content'] = self.content.model_dump(**kwargs)
+        
+        return data
     
     class Config:
         populate_by_name = True
@@ -214,11 +261,38 @@ AGENT_URIS = {
 }
 
 # Agent service URLs (for HTTP communication)
-AGENT_SERVICES = {
-    "agent://coordinator": "http://coordinator-service:8006",
-    "agent://topic-refiner": "http://topic-refiner-service:8001",
-    "agent://question-architect": "http://question-architect-service:8002",
-    "agent://search-strategist": "http://search-strategist-service:8003",
-    "agent://data-analyst": "http://data-analyst-service:8004",
-    "agent://report-writer": "http://report-writer-service:8005"
-}
+# Auto-detect local vs Kubernetes environment
+import os
+
+def _get_agent_services():
+    """Get agent service URLs based on environment"""
+    # Allow override via environment variable
+    env_override = os.getenv("AGENT_ENVIRONMENT", "").lower()
+    
+    # Auto-detect if not explicitly set
+    if env_override == "local" or (env_override == "" and (
+        os.path.exists("venv") or 
+        os.path.exists(".env.local") or
+        os.getenv("REDIS_HOST") == "localhost"
+    )):
+        # Local development URLs
+        return {
+            "agent://coordinator": "http://localhost:8006",
+            "agent://topic-refiner": "http://localhost:8001",
+            "agent://question-architect": "http://localhost:8002",
+            "agent://search-strategist": "http://localhost:8003",
+            "agent://data-analyst": "http://localhost:8004",
+            "agent://report-writer": "http://localhost:8005"
+        }
+    else:
+        # Kubernetes service URLs
+        return {
+            "agent://coordinator": "http://coordinator-service:8006",
+            "agent://topic-refiner": "http://topic-refiner-service:8001",
+            "agent://question-architect": "http://question-architect-service:8002",
+            "agent://search-strategist": "http://search-strategist-service:8003",
+            "agent://data-analyst": "http://data-analyst-service:8004",
+            "agent://report-writer": "http://report-writer-service:8005"
+        }
+
+AGENT_SERVICES = _get_agent_services()
