@@ -6,6 +6,38 @@ A distributed AI research system with **two implementation versions**: Custom RE
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io/)
 [![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 
+## 📑 Table of Contents
+
+- [Two Versions Available](#-two-versions-available)
+- [Features](#-features)
+- [Architecture](#️-architecture)
+  - [Quick Overview](#quick-overview)
+  - [The Agent Team](#the-agent-team)
+  - [Research Workflow](#research-workflow)
+  - [Key Architectural Features](#key-architectural-features)
+- [Quick Start](#-quick-start)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+    - [Option 1: Local deployment (Testing)](#option-1-local-deployment-testing)
+    - [Option 2: Kind Cluster (Development)](#option-2-kind-cluster-development)
+    - [Option 3: kubeadm Cluster with Local Registry](#option-3-kubeadm-cluster-with-local-registry)
+- [Usage](#-usage)
+  - [Conducting Research](#conducting-research)
+  - [Example Topics](#example-topics)
+- [Repository Structure](#-repository-structure)
+- [Switching Between Versions](#-switching-between-versions)
+- [Reusing Agents](#-reusing-agents)
+- [Development](#️-development)
+  - [Scaling Agents](#scaling-agents)
+  - [Monitoring](#monitoring)
+- [Management](#-management)
+- [Resource Requirements](#-resource-requirements)
+- [Troubleshooting](#-troubleshooting)
+- [Documentation](#-documentation)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Acknowledgments](#-acknowledgments)
+
 ## 🎯 Two Versions Available
 
 This repository contains **two complete implementations**:
@@ -166,7 +198,8 @@ Each agent uses specific temperature settings for optimal performance:
 
 ### Prerequisites
 
-- **Kubernetes Cluster** - Either:
+- (*For local deployment*) **Local Deployment guide** [here](docs/local-deployment.md)
+- (*For Kubernetes deployments*) **Kubernetes Cluster** - Either:
   - **[Kind](https://kind.sigs.k8s.io/)** (Kubernetes in Docker) for local development
   - **[kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/)** for production-ready clusters
 - **[kubectl](https://kubernetes.io/docs/tasks/tools/)** - Kubernetes CLI
@@ -175,7 +208,11 @@ Each agent uses specific temperature settings for optimal performance:
 
 ### Installation
 
-#### Option 1: Kind Cluster (Development)
+#### Option 1: Local deployment (Testing)
+
+1. **Follow [this](docs/local-deployment.md) documentation**
+
+#### Option 2: Kind Cluster (Development)
 
 1. **Clone the repository**
    ```bash
@@ -214,7 +251,7 @@ Each agent uses specific temperature settings for optimal performance:
    # Open http://localhost:8501
    ```
 
-#### Option 2: kubeadm Cluster with Local Registry
+#### Option 3: kubeadm Cluster with Local Registry
 
 For kubeadm clusters using a local registry (e.g., `lynx.tigera.local`):
 
