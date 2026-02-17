@@ -216,7 +216,7 @@ Each agent uses specific temperature settings for optimal performance:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/multi-agent-research-system.git
+   git clone https://github.com/davselliTigera/multi-agent-research-system.git
    cd multi-agent-research-system
    ```
 
@@ -257,7 +257,7 @@ For kubeadm clusters using a local registry (e.g., `lynx.tigera.local`):
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/multi-agent-research-system.git
+   git clone https://github.com/davselliTigera/multi-agent-research-system.git
    cd multi-agent-research-system
    ```
 

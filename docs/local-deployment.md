@@ -15,7 +15,7 @@ You can run the entire system locally on your machine for development and testin
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/multi-agent-research-system.git
+git clone https://github.com/davselliTigera/multi-agent-research-system.git
 cd multi-agent-research-system
 
 # 2. Set your Google API key
